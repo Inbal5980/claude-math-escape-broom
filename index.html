@@ -1,142 +1,113 @@
-import React, { useState } from 'react';
-import { Sparkles } from 'lucide-react';
-
-const MathEscapeRoom = () => {
-  const [firstNum, setFirstNum] = useState('');
-  const [secondNum, setSecondNum] = useState('');
-  const [result, setResult] = useState('');
-  const [message, setMessage] = useState('');
-  const [isCorrect, setIsCorrect] = useState(false);
-
-  const resetInputs = () => {
-    setFirstNum('');
-    setSecondNum('');
-    setResult('');
-    setMessage('');
-    setIsCorrect(false);
-  };
-
-  const checkAnswer = () => {
-    // בדיקה אם כל השדות מלאים
-    if (!firstNum.trim() || !secondNum.trim() || !result.trim()) {
-      setMessage('❌ אופס! עליך למלא את כל השדות');
-      setIsCorrect(false);
-      return;
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>אקדמיה לקסומים - חדר בריחה מתמטי</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box }
+    body {
+      font-family: system-ui, Arial, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+      height:100vh; width:100vw; display:flex; align-items:center; justify-content:center; overflow:hidden;
     }
-
-    const num1 = parseInt(firstNum.trim());
-    const num2 = parseInt(secondNum.trim());
-    const res = parseInt(result.trim());
-
-    // בדיקה שהערכים הם מספרים תקינים
-    if (isNaN(num1) || isNaN(num2) || isNaN(res)) {
-      setMessage('❌ אופסס.. זה לא נכון. נסו שוב');
-      setIsCorrect(false);
-      return;
-    }
-
-    // בדיקה אם זה התרגיל הנכון: 3+5=8 או 5+3=8
-    if ((num1 === 3 && num2 === 5 && res === 8) || (num1 === 5 && num2 === 3 && res === 8)) {
-      setMessage('🎉 כל הכבוד! כעת לחצו על חץ ההמשך וכתבו את הפתרון במקום המתאים כדי לעבור לחדר הבא!');
-      setIsCorrect(true);
-      return;
-    }
-
-    // בדיקה אם זה תרגיל חיבור נכון מתמטית
-    if (num1 + num2 === res) {
-      setMessage('🤔 התרגיל המתמטי שכתבתם נכון אבל הוא אינו מתאים לפתרון השאלה בחדר. נסו שוב!');
-      setIsCorrect(false);
-      return;
-    }
-    
-    setMessage('❌ אופסס.. זה לא נכון. נסו שוב');
-    setIsCorrect(false);
-  };
-
-  return (
-    <div className="min-h-screen p-8 flex items-center justify-center" style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'}}>
-      <div className="max-w-4xl w-full">
-        {/* הסכימה */}
-        <div className="bg-white rounded-3xl shadow-2xl p-12">
-          {/* תיבות שינוי והתחלה */}
-          <div className="flex justify-center gap-8 mb-8">
-            <div className="text-center">
-              <div className="text-purple-700 font-bold text-xl mb-3">שינוי</div>
-              <input
-                type="text"
-                value={firstNum}
-                onChange={(e) => setFirstNum(e.target.value)}
-                className="w-48 h-24 text-4xl text-center border-4 border-yellow-400 rounded-2xl bg-yellow-100 focus:outline-none focus:border-yellow-500"
-                disabled={isCorrect}
-              />
-            </div>
-            <div className="text-center">
-              <div className="text-purple-700 font-bold text-xl mb-3">התחלה</div>
-              <input
-                type="text"
-                value={secondNum}
-                onChange={(e) => setSecondNum(e.target.value)}
-                className="w-48 h-24 text-4xl text-center border-4 border-yellow-400 rounded-2xl bg-yellow-100 focus:outline-none focus:border-yellow-500"
-                disabled={isCorrect}
-              />
-            </div>
+    .container { background:#fff; border-radius:30px; padding:30px; width:90vw; height:85vh; max-width:1200px; max-height:700px; box-shadow:0 20px 60px rgba(0,0,0,.3); overflow:auto; display:flex; align-items:center; justify-content:center; position:relative }
+    .container::before{content:"✨"; position:absolute; top:20px; left:20px; font-size:40px; animation:twinkle 2s infinite}
+    .container::after{content:"⭐"; position:absolute; bottom:20px; right:20px; font-size:40px; animation:twinkle 2s infinite 1s}
+    @keyframes twinkle{0%,100%{opacity:1; transform:scale(1)} 50%{opacity:.5; transform:scale(1.2)}}
+    .schema{display:flex; flex-direction:column; align-items:center; gap:12px; width:100%}
+    .boxes-container{display:flex; gap:30px; width:100%; max-width:700px}
+    .box{flex:1; display:flex; flex-direction:column; gap:20px}
+    .box-label{font-size:26px; font-weight:bold; color:#764ba2; text-align:center}
+    .box-input{background:linear-gradient(135deg,#ffeaa7,#fdcb6e); border:4px solid #fdcb6e; border-radius:20px; padding:35px 25px; min-height:130px; display:flex; align-items:center; justify-content:center}
+    .box-input input{width:100%; font-size:44px; font-weight:bold; text-align:center; border:none; background:transparent; color:#2d3436; outline:none}
+    .arrow{font-size:60px; color:#764ba2; margin:10px 0 8px}
+    .result-label{font-size:26px; font-weight:bold; color:#764ba2; text-align:center; margin-bottom:10px}
+    .result-box{background:linear-gradient(135deg,#a29bfe,#6c5ce7); border:4px solid #6c5ce7; border-radius:20px; padding:30px 40px; min-height:120px; display:flex; align-items:center; justify-content:center; max-width:380px; width:100%}
+    .result-box input{width:100%; font-size:44px; font-weight:bold; text-align:center; border:none; background:transparent; color:#fff; outline:none}
+    button{margin-top:15px; padding:16px 50px; font-size:23px; font-weight:bold; color:#fff; background:linear-gradient(135deg,#667eea,#764ba2); border:none; border-radius:15px; cursor:pointer; transition:.3s; box-shadow:0 5px 15px rgba(102,126,234,.4)}
+    button:hover{transform:translateY(-3px); box-shadow:0 8px 20px rgba(102,126,234,.6)}
+    .message{margin-top:15px; padding:20px; border-radius:15px; font-size:22px; font-weight:bold; text-align:center; display:none; max-width:800px; line-height:1.4}
+    .success{background:linear-gradient(135deg,#55efc4,#00b894); color:#fff; border:3px solid #00b894; display:block}
+    .warning{background:linear-gradient(135deg,#fab1a0,#ff7675); color:#fff; border:3px solid #ff7675; display:block}
+    .error{background:linear-gradient(135deg,#fd79a8,#e84393); color:#fff; border:3px solid #e84393; display:block}
+    .magic-wand{font-size:30px; display:inline-block; animation:wave 1s infinite}
+    @keyframes wave{0%,100%{transform:rotate(0)} 25%{transform:rotate(20deg)} 75%{transform:rotate(-20deg)}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="schema">
+      <div class="boxes-container">
+        <div class="box">
+          <div class="box-label">התחלה</div>
+          <div class="box-input">
+            <input type="text" id="whole" placeholder="">
           </div>
-
-          {/* חץ */}
-          <div className="text-center mb-6">
-            <div className="text-4xl text-purple-600">↓</div>
+        </div>
+        <div class="box">
+          <div class="box-label">שינוי</div>
+          <div class="box-input">
+            <input type="text" id="start" placeholder="">
           </div>
-
-          {/* תיבת סוף */}
-          <div className="text-center mb-8">
-            <div className="text-purple-700 font-bold text-xl mb-3">סוף</div>
-            <input
-              type="text"
-              value={result}
-              onChange={(e) => setResult(e.target.value)}
-              className="w-64 h-28 text-4xl text-center border-4 border-purple-400 rounded-2xl bg-purple-100 focus:outline-none focus:border-purple-500"
-              disabled={isCorrect}
-            />
-          </div>
-
-          {/* כפתור בדיקה */}
-          {!isCorrect && (
-            <button
-              onClick={checkAnswer}
-              className="w-full py-5 rounded-xl text-2xl font-bold bg-gradient-to-r from-purple-500 to-indigo-600 text-white hover:from-purple-600 hover:to-indigo-700 transform hover:scale-105 transition-all flex items-center justify-center gap-2"
-            >
-              <Sparkles size={24} />
-              בדוק תשובה
-              <Sparkles size={24} />
-            </button>
-          )}
-
-          {/* הודעת משוב */}
-          {message && (
-            <div className={`mt-6 p-5 rounded-xl text-center text-xl font-semibold ${
-              message.includes('כל הכבוד')
-                ? 'bg-green-100 text-green-800 border-4 border-green-400'
-                : message.includes('התרגיל המתמטי שכתבתם נכון')
-                ? 'bg-yellow-100 text-yellow-800 border-4 border-yellow-400'
-                : 'bg-red-100 text-red-800 border-4 border-red-400'
-            }`} dir="rtl">
-              {message}
-            </div>
-          )}
-
-          {/* כפתור נסו שוב */}
-          {message && !isCorrect && (
-            <button
-              onClick={resetInputs}
-              className="w-full mt-4 py-4 rounded-xl text-xl font-bold bg-gradient-to-r from-orange-400 to-pink-500 text-white hover:from-orange-500 hover:to-pink-600 transform hover:scale-105 transition-all"
-            >
-              🔄 נסו שוב
-            </button>
-          )}
         </div>
       </div>
-    </div>
-  );
-};
 
-export default MathEscapeRoom;
+      <div class="arrow">↓</div>
+
+      <div class="result-label">סוף</div>
+      <div class="result-box">
+        <input type="text" id="end" placeholder="">
+      </div>
+
+      <button id="checkBtn">
+        <span class="magic-wand">🪄</span>
+        בדוק תשובה
+        <span class="magic-wand">🪄</span>
+      </button>
+
+      <div id="message" class="message"></div>
+    </div>
+  </div>
+
+  <script>
+    function showMessage(kind, html) {
+      const el = document.getElementById('message');
+      el.className = 'message ' + kind;
+      el.innerHTML = html;
+      el.style.display = 'block';
+    }
+    function checkAnswer() {
+      const whole = document.getElementById('whole').value.trim();
+      const start = document.getElementById('start').value.trim();
+      const end   = document.getElementById('end').value.trim();
+
+      const fullAnswer  = whole + '+' + start + '=' + end;
+      const cleanAnswer = fullAnswer.replace(/\s/g, '');
+
+      if (cleanAnswer === '3+5=8' || cleanAnswer === '5+3=8') {
+        showMessage('success','🎉 כל הכבוד! כעת לחצו על חץ ההמשך וכתבו את הפתרון במקום המתאים כדי לעבור לחדר הבא!');
+        return;
+      }
+      if (!whole || !start || !end) {
+        showMessage('error','❌ אופס! עליך למלא את כל השדות');
+        return;
+      }
+      const n1 = parseInt(whole,10), n2 = parseInt(start,10), n3 = parseInt(end,10);
+      if (isNaN(n1) || isNaN(n2) || isNaN(n3)) {
+        showMessage('error','❌ אופסס.. זה לא נכון. נסו שוב');
+        return;
+      }
+      if (n1 + n2 === n3) {
+        showMessage('warning','🤔 התרגיל המתמטי שכתבתם נכון אבל הוא אינו מתאים לפתרון השאלה בחדר. נסו שוב!');
+      } else {
+        showMessage('error','❌ אופסס.. זה לא נכון. נסו שוב');
+      }
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('checkBtn');
+      if (btn) btn.addEventListener('click', checkAnswer);
+    });
+  </script>
+</body>
+</html>
