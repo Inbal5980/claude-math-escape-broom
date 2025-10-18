@@ -1,142 +1,321 @@
-import React, { useState } from 'react';
-import { Sparkles } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>חדר הבריחה המתמטי</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-const MathEscapeRoom = () => {
-  const [firstNum, setFirstNum] = useState('');
-  const [secondNum, setSecondNum] = useState('');
-  const [result, setResult] = useState('');
-  const [message, setMessage] = useState('');
-  const [isCorrect, setIsCorrect] = useState(false);
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
 
-  const resetInputs = () => {
-    setFirstNum('');
-    setSecondNum('');
-    setResult('');
-    setMessage('');
-    setIsCorrect(false);
-  };
+        .container {
+            width: 100%;
+            height: 100%;
+            max-width: 1400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
 
-  const checkAnswer = () => {
-    // בדיקה אם כל השדות מלאים
-    if (!firstNum.trim() || !secondNum.trim() || !result.trim()) {
-      setMessage('❌ אופס! עליך למלא את כל השדות');
-      setIsCorrect(false);
-      return;
-    }
+        .card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            padding: 32px;
+            width: 100%;
+            max-width: 900px;
+        }
 
-    const num1 = parseInt(firstNum.trim());
-    const num2 = parseInt(secondNum.trim());
-    const res = parseInt(result.trim());
+        .input-row {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
 
-    // בדיקה שהערכים הם מספרים תקינים
-    if (isNaN(num1) || isNaN(num2) || isNaN(res)) {
-      setMessage('❌ אופסס.. זה לא נכון. נסו שוב');
-      setIsCorrect(false);
-      return;
-    }
+        .input-group {
+            text-align: center;
+        }
 
-    // בדיקה אם זה התרגיל הנכון: 3+5=8 או 5+3=8
-    if ((num1 === 3 && num2 === 5 && res === 8) || (num1 === 5 && num2 === 3 && res === 8)) {
-      setMessage('🎉 כל הכבוד! כעת לחצו על חץ ההמשך וכתבו את הפתרון במקום המתאים כדי לעבור לחדר הבא!');
-      setIsCorrect(true);
-      return;
-    }
+        .label {
+            color: #6b46c1;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
 
-    // בדיקה אם זה תרגיל חיבור נכון מתמטית
-    if (num1 + num2 === res) {
-      setMessage('🤔 התרגיל המתמטי שכתבתם נכון אבל הוא אינו מתאים לפתרון השאלה בחדר. נסו שוב!');
-      setIsCorrect(false);
-      return;
-    }
-    
-    setMessage('❌ אופסס.. זה לא נכון. נסו שוב');
-    setIsCorrect(false);
-  };
+        .input-box {
+            width: 144px;
+            height: 80px;
+            font-size: 32px;
+            text-align: center;
+            border: 4px solid #fbbf24;
+            border-radius: 16px;
+            background: #fef3c7;
+            outline: none;
+            transition: border-color 0.3s;
+        }
 
-  return (
-    <div className="w-full h-screen flex items-center justify-center" style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', aspectRatio: '16/9'}}>
-      <div className="w-full h-full max-w-7xl flex items-center justify-center p-6">
-        {/* הסכימה */}
-        <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-4xl">
-          {/* תיבות שינוי והתחלה */}
-          <div className="flex justify-center gap-6 mb-6">
-            <div className="text-center">
-              <div className="text-purple-700 font-bold text-lg mb-2">שינוי</div>
-              <input
-                type="text"
-                value={firstNum}
-                onChange={(e) => setFirstNum(e.target.value)}
-                className="w-36 h-20 text-3xl text-center border-4 border-yellow-400 rounded-2xl bg-yellow-100 focus:outline-none focus:border-yellow-500"
-                disabled={isCorrect}
-              />
+        .input-box:focus {
+            border-color: #f59e0b;
+        }
+
+        .input-box:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .result-box {
+            width: 192px;
+            height: 96px;
+            border: 4px solid #a78bfa;
+            background: #ede9fe;
+        }
+
+        .result-box:focus {
+            border-color: #8b5cf6;
+        }
+
+        .arrow {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .arrow-icon {
+            font-size: 32px;
+            color: #8b5cf6;
+        }
+
+        .result-section {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .button {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .button:hover {
+            transform: scale(1.05);
+        }
+
+        .check-button {
+            background: linear-gradient(to right, #8b5cf6, #4f46e5);
+            color: white;
+        }
+
+        .check-button:hover {
+            background: linear-gradient(to right, #7c3aed, #4338ca);
+        }
+
+        .retry-button {
+            background: linear-gradient(to right, #fb923c, #ec4899);
+            color: white;
+            margin-top: 12px;
+        }
+
+        .retry-button:hover {
+            background: linear-gradient(to right, #f97316, #db2777);
+        }
+
+        .message {
+            margin-top: 16px;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            direction: rtl;
+        }
+
+        .message.success {
+            background: #dcfce7;
+            color: #166534;
+            border: 4px solid #86efac;
+        }
+
+        .message.warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 4px solid #fde047;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 4px solid #fca5a5;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .sparkle {
+            display: inline-block;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <!-- תיבות שינוי והתחלה -->
+            <div class="input-row">
+                <div class="input-group">
+                    <div class="label">שינוי</div>
+                    <input type="text" id="firstNum" class="input-box" maxlength="2">
+                </div>
+                <div class="input-group">
+                    <div class="label">התחלה</div>
+                    <input type="text" id="secondNum" class="input-box" maxlength="2">
+                </div>
             </div>
-            <div className="text-center">
-              <div className="text-purple-700 font-bold text-lg mb-2">התחלה</div>
-              <input
-                type="text"
-                value={secondNum}
-                onChange={(e) => setSecondNum(e.target.value)}
-                className="w-36 h-20 text-3xl text-center border-4 border-yellow-400 rounded-2xl bg-yellow-100 focus:outline-none focus:border-yellow-500"
-                disabled={isCorrect}
-              />
+
+            <!-- חץ -->
+            <div class="arrow">
+                <div class="arrow-icon">↓</div>
             </div>
-          </div>
 
-          {/* חץ */}
-          <div className="text-center mb-4">
-            <div className="text-3xl text-purple-600">↓</div>
-          </div>
+            <!-- תיבת סוף -->
+            <div class="result-section">
+                <div class="label">סוף</div>
+                <input type="text" id="result" class="input-box result-box" maxlength="2">
+            </div>
 
-          {/* תיבת סוף */}
-          <div className="text-center mb-6">
-            <div className="text-purple-700 font-bold text-lg mb-2">סוף</div>
-            <input
-              type="text"
-              value={result}
-              onChange={(e) => setResult(e.target.value)}
-              className="w-48 h-24 text-3xl text-center border-4 border-purple-400 rounded-2xl bg-purple-100 focus:outline-none focus:border-purple-500"
-              disabled={isCorrect}
-            />
-          </div>
-
-          {/* כפתור בדיקה */}
-          {!isCorrect && (
-            <button
-              onClick={checkAnswer}
-              className="w-full py-4 rounded-xl text-xl font-bold bg-gradient-to-r from-purple-500 to-indigo-600 text-white hover:from-purple-600 hover:to-indigo-700 transform hover:scale-105 transition-all flex items-center justify-center gap-2"
-            >
-              <Sparkles size={20} />
-              בדוק תשובה
-              <Sparkles size={20} />
+            <!-- כפתור בדיקה -->
+            <button id="checkBtn" class="button check-button">
+                <span class="sparkle">✨</span>
+                <span>בדוק תשובה</span>
+                <span class="sparkle">✨</span>
             </button>
-          )}
 
-          {/* הודעת משוב */}
-          {message && (
-            <div className={`mt-4 p-4 rounded-xl text-center text-lg font-semibold ${
-              message.includes('כל הכבוד')
-                ? 'bg-green-100 text-green-800 border-4 border-green-400'
-                : message.includes('התרגיל המתמטי שכתבתם נכון')
-                ? 'bg-yellow-100 text-yellow-800 border-4 border-yellow-400'
-                : 'bg-red-100 text-red-800 border-4 border-red-400'
-            }`} dir="rtl">
-              {message}
-            </div>
-          )}
+            <!-- הודעת משוב -->
+            <div id="message" class="message hidden"></div>
 
-          {/* כפתור נסו שוב */}
-          {message && !isCorrect && (
-            <button
-              onClick={resetInputs}
-              className="w-full mt-3 py-3 rounded-xl text-lg font-bold bg-gradient-to-r from-orange-400 to-pink-500 text-white hover:from-orange-500 hover:to-pink-600 transform hover:scale-105 transition-all"
-            >
-              🔄 נסו שוב
+            <!-- כפתור נסו שוב -->
+            <button id="retryBtn" class="button retry-button hidden">
+                🔄 נסו שוב
             </button>
-          )}
         </div>
-      </div>
     </div>
-  );
-};
 
-export default MathEscapeRoom;
+    <script>
+        const firstNumInput = document.getElementById('firstNum');
+        const secondNumInput = document.getElementById('secondNum');
+        const resultInput = document.getElementById('result');
+        const checkBtn = document.getElementById('checkBtn');
+        const retryBtn = document.getElementById('retryBtn');
+        const messageDiv = document.getElementById('message');
+
+        let isCorrect = false;
+
+        function checkAnswer() {
+            const firstNum = firstNumInput.value.trim();
+            const secondNum = secondNumInput.value.trim();
+            const result = resultInput.value.trim();
+
+            // בדיקה אם כל השדות מלאים
+            if (!firstNum || !secondNum || !result) {
+                showMessage('❌ אופס! עליך למלא את כל השדות', 'error');
+                return;
+            }
+
+            const num1 = parseInt(firstNum);
+            const num2 = parseInt(secondNum);
+            const res = parseInt(result);
+
+            // בדיקה שהערכים הם מספרים תקינים
+            if (isNaN(num1) || isNaN(num2) || isNaN(res)) {
+                showMessage('❌ אופסס.. זה לא נכון. נסו שוב', 'error');
+                return;
+            }
+
+            // בדיקה אם זה התרגיל הנכון: 3+5=8 או 5+3=8
+            if ((num1 === 3 && num2 === 5 && res === 8) || (num1 === 5 && num2 === 3 && res === 8)) {
+                showMessage('🎉 כל הכבוד! כעת לחצו על חץ ההמשך וכתבו את הפתרון במקום המתאים כדי לעבור לחדר הבא!', 'success');
+                isCorrect = true;
+                disableInputs();
+                checkBtn.classList.add('hidden');
+                retryBtn.classList.add('hidden');
+                return;
+            }
+
+            // בדיקה אם זה תרגיל חיבור נכון מתמטית
+            if (num1 + num2 === res) {
+                showMessage('🤔 התרגיל המתמטי שכתבתם נכון אבל הוא אינו מתאים לפתרון השאלה בחדר. נסו שוב!', 'warning');
+                retryBtn.classList.remove('hidden');
+                return;
+            }
+
+            showMessage('❌ אופסס.. זה לא נכון. נסו שוב', 'error');
+            retryBtn.classList.remove('hidden');
+        }
+
+        function showMessage(text, type) {
+            messageDiv.textContent = text;
+            messageDiv.className = 'message ' + type;
+            messageDiv.classList.remove('hidden');
+        }
+
+        function resetInputs() {
+            firstNumInput.value = '';
+            secondNumInput.value = '';
+            resultInput.value = '';
+            messageDiv.classList.add('hidden');
+            retryBtn.classList.add('hidden');
+            isCorrect = false;
+            enableInputs();
+        }
+
+        function disableInputs() {
+            firstNumInput.disabled = true;
+            secondNumInput.disabled = true;
+            resultInput.disabled = true;
+        }
+
+        function enableInputs() {
+            firstNumInput.disabled = false;
+            secondNumInput.disabled = false;
+            resultInput.disabled = false;
+        }
+
+        checkBtn.addEventListener('click', checkAnswer);
+        retryBtn.addEventListener('click', resetInputs);
+
+        // אפשרות ללחוץ Enter לבדיקה
+        [firstNumInput, secondNumInput, resultInput].forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !isCorrect) {
+                    checkAnswer();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
