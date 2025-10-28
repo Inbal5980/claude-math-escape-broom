@@ -522,21 +522,25 @@
             }
         }
 
-        document.addEventListener('dragstart', (e) => {
-            if (e.target.classList.contains('broom') && e.target.draggable) {
-                draggedBroom = parseInt(e.target.dataset.id);
-                e.target.style.opacity = '0.5';
-            }
-        });
+        function setupDragEvents() {
+            document.querySelectorAll('.broom').forEach(broom => {
+                broom.addEventListener('dragstart', (e) => {
+                    if (broom.draggable) {
+                        draggedBroom = parseInt(broom.dataset.id);
+                        broom.style.opacity = '0.5';
+                        e.dataTransfer.effectAllowed = 'move';
+                    }
+                });
 
-        document.addEventListener('dragend', (e) => {
-            if (e.target.classList.contains('broom')) {
-                e.target.style.opacity = '1';
-            }
-        });
+                broom.addEventListener('dragend', (e) => {
+                    broom.style.opacity = '1';
+                });
+            });
+        }
 
         roomZone.addEventListener('dragover', (e) => {
             e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
         });
 
         roomZone.addEventListener('drop', (e) => {
@@ -546,7 +550,9 @@
                 addedBrooms.push(draggedBroom);
                 
                 const broomEl = document.querySelector(`[data-id="${draggedBroom}"]`);
-                broomEl.remove();
+                if (broomEl) {
+                    broomEl.remove();
+                }
                 
                 const newBroom = document.createElement('div');
                 newBroom.className = 'broom added';
@@ -555,6 +561,7 @@
                 newBroom.innerHTML = '🧹<span class="sparkle">✨</span>';
                 roomZone.appendChild(newBroom);
                 
+                setupDragEvents();
                 updateStats();
             }
             draggedBroom = null;
@@ -562,6 +569,7 @@
 
         storageZone.addEventListener('dragover', (e) => {
             e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
         });
 
         storageZone.addEventListener('drop', (e) => {
@@ -571,11 +579,80 @@
                 addedBrooms = addedBrooms.filter(id => id !== draggedBroom);
                 
                 const broomEl = roomZone.querySelector(`[data-id="${draggedBroom}"]`);
-                broomEl.remove();
+                if (broomEl) {
+                    broomEl.remove();
+                }
                 
                 const newBroom = document.createElement('div');
                 newBroom.className = 'broom';
                 newBroom.draggable = true;
                 newBroom.dataset.id = draggedBroom;
                 newBroom.innerHTML = '🧹<span class="drag-label">גרור!</span>';
-                storag
+                storageZone.appendChild(newBroom);
+                
+                setupDragEvents();
+                updateStats();
+            }
+            draggedBroom = null;
+        });
+
+        checkBtn.addEventListener('click', () => {
+            const answer = parseInt(answerInput.value);
+            feedback.classList.add('show');
+            
+            if (answer === addedBrooms.length) {
+                feedback.className = 'feedback show correct';
+                feedback.innerHTML = `
+                    <div style="text-align: center; margin-bottom: 0.75rem;">
+                        <span style="font-size: 2rem;">🎉</span>
+                        כל הכבוד! התשובה נכונה!
+                        <span style="font-size: 2rem;">⭐</span>
+                    </div>
+                    <div class="explanation">
+                        <p>היו 3 מטאטאים בהתחלה</p>
+                        <p>הוספת ${addedBrooms.length} מטאטאים</p>
+                        <p>עכשיו יש 8 מטאטאים!</p>
+                        <p style="text-align: center; margin-top: 0.5rem; color: #fcd34d;">8 - 3 = ${addedBrooms.length} ✨</p>
+                    </div>
+                `;
+            } else {
+                feedback.className = 'feedback show wrong';
+                feedback.innerHTML = `
+                    <p style="text-align: center;">לא נכון, נסה שוב! 💪</p>
+                    <p style="font-size: 0.9rem; margin-top: 0.5rem; text-align: right;">ספור כמה מטאטאים גררת מהמחסן לחדר</p>
+                `;
+            }
+        });
+
+        resetBtn.addEventListener('click', () => {
+            roomBrooms = [1, 2, 3];
+            addedBrooms = [];
+            answerInput.value = '';
+            feedback.classList.remove('show');
+            
+            roomZone.innerHTML = `
+                <div class="broom" draggable="false" data-id="1">🧹</div>
+                <div class="broom" draggable="false" data-id="2">🧹</div>
+                <div class="broom" draggable="false" data-id="3">🧹</div>
+            `;
+            
+            storageZone.innerHTML = `
+                <div class="broom" draggable="true" data-id="4">🧹<span class="drag-label">גרור!</span></div>
+                <div class="broom" draggable="true" data-id="5">🧹<span class="drag-label">גרור!</span></div>
+                <div class="broom" draggable="true" data-id="6">🧹<span class="drag-label">גרור!</span></div>
+                <div class="broom" draggable="true" data-id="7">🧹<span class="drag-label">גרור!</span></div>
+                <div class="broom" draggable="true" data-id="8">🧹<span class="drag-label">גרור!</span></div>
+                <div class="broom" draggable="true" data-id="9">🧹<span class="drag-label">גרור!</span></div>
+                <div class="broom" draggable="true" data-id="10">🧹<span class="drag-label">גרור!</span></div>
+            `;
+            
+            setupDragEvents();
+            updateStats();
+        });
+
+        // Initialize drag events on page load
+        setupDragEvents();
+        updateStats();
+    </script>
+</body>
+</html>
