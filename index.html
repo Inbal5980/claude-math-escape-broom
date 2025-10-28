@@ -1,269 +1,581 @@
-import React, { useState } from 'react';
-import { Sparkles, RotateCcw, CheckCircle, ArrowDown } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>חדר המטאטאים המעופפים</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-const MagicBroomsApp = () => {
-  const [roomBrooms, setRoomBrooms] = useState([1, 2, 3]);
-  const [addedBrooms, setAddedBrooms] = useState([]);
-  const [availableBrooms, setAvailableBrooms] = useState([4, 5, 6, 7, 8, 9, 10]);
-  const [userAnswer, setUserAnswer] = useState('');
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [isCorrect, setIsCorrect] = useState(false);
-  const [draggedBroom, setDraggedBroom] = useState(null);
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #4c1d95 0%, #312e81 50%, #1e3a8a 100%);
+            height: 100vh;
+            overflow: hidden;
+            direction: rtl;
+        }
 
-  const targetTotal = 8;
+        .container {
+            max-width: 1400px;
+            height: 100vh;
+            margin: 0 auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+        }
 
-  const handleDragStart = (e, broomId) => {
-    setDraggedBroom(broomId);
-    e.dataTransfer.effectAllowed = 'move';
-  };
+        .header {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
 
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  };
+        .header h1 {
+            color: #fcd34d;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
 
-  const handleDropToRoom = (e) => {
-    e.preventDefault();
-    if (draggedBroom && availableBrooms.includes(draggedBroom)) {
-      setAvailableBrooms(availableBrooms.filter(b => b !== draggedBroom));
-      setAddedBrooms([...addedBrooms, draggedBroom]);
-      setRoomBrooms([...roomBrooms, draggedBroom]);
-    }
-    setDraggedBroom(null);
-  };
+        .header p {
+            color: #c4b5fd;
+            font-size: 1.1rem;
+        }
 
-  const handleDropBack = (e) => {
-    e.preventDefault();
-    if (draggedBroom && addedBrooms.includes(draggedBroom)) {
-      setAddedBrooms(addedBrooms.filter(b => b !== draggedBroom));
-      setRoomBrooms(roomBrooms.filter(b => b !== draggedBroom));
-      setAvailableBrooms([...availableBrooms, draggedBroom].sort((a, b) => a - b));
-    }
-    setDraggedBroom(null);
-  };
+        .main-grid {
+            display: grid;
+            grid-template-columns: 25% 75%;
+            gap: 0.75rem;
+            flex: 1;
+            min-height: 0;
+        }
 
-  const handleSubmit = () => {
-    const answer = parseInt(userAnswer);
-    const correct = answer === addedBrooms.length;
-    setIsCorrect(correct);
-    setShowFeedback(true);
-  };
+        .instructions-box {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 1rem;
+            border: 2px solid rgba(250, 204, 21, 0.5);
+            overflow-y: auto;
+        }
 
-  const reset = () => {
-    setRoomBrooms([1, 2, 3]);
-    setAddedBrooms([]);
-    setAvailableBrooms([4, 5, 6, 7, 8, 9, 10]);
-    setUserAnswer('');
-    setShowFeedback(false);
-    setIsCorrect(false);
-  };
+        .instructions-box h3 {
+            color: white;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
 
-  const renderBroom = (id, location) => {
-    const isAdded = addedBrooms.includes(id);
-    return (
-      <div
-        key={id}
-        draggable={location !== 'initial'}
-        onDragStart={(e) => handleDragStart(e, id)}
-        className={`relative cursor-move transform hover:scale-110 transition-all ${
-          isAdded ? 'animate-bounce' : ''
-        }`}
-        style={{
-          animationDelay: `${id * 0.1}s`,
-          animationDuration: '2s'
-        }}
-      >
-        <div className="text-5xl">🧹</div>
-        {isAdded && (
-          <div className="absolute -top-1 -right-1">
-            <Sparkles className="w-4 h-4 text-yellow-400 animate-pulse" />
-          </div>
-        )}
-        {location === 'available' && (
-          <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 bg-purple-600 text-white text-xs px-1 py-0.5 rounded-full">
-            גרור!
-          </div>
-        )}
-      </div>
-    );
-  };
+        .instructions-box ol {
+            background: rgba(91, 33, 182, 0.5);
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            list-style-position: inside;
+            font-size: 0.85rem;
+            color: white;
+        }
 
-  const totalInRoom = roomBrooms.length;
-  const needMore = targetTotal - totalInRoom;
+        .instructions-box li {
+            margin-bottom: 0.5rem;
+        }
 
-  return (
-    <div className="h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 p-4 overflow-hidden" dir="rtl">
-      <div className="h-full max-w-7xl mx-auto flex flex-col">
-        <div className="text-center mb-3">
-          <h1 className="text-4xl font-bold text-yellow-300 mb-2 flex items-center justify-center gap-3">
-            <Sparkles className="w-8 h-8" />
-            חדר המטאטאים המעופפים
-            <Sparkles className="w-8 h-8" />
-          </h1>
-          <p className="text-lg text-purple-200">גרור מטאטאים לחדר ופתור את החידה!</p>
+        .instructions-box .number {
+            color: #fcd34d;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .right-side {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            min-height: 0;
+        }
+
+        .room-box, .storage-box {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 0.75rem;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .room-box {
+            border: 2px solid rgba(244, 114, 182, 0.5);
+        }
+
+        .storage-box {
+            border: 2px solid rgba(96, 165, 250, 0.5);
+        }
+
+        .section-title {
+            text-align: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.75rem;
+        }
+
+        .room-content, .storage-content {
+            display: grid;
+            gap: 0.75rem;
+            height: calc(100% - 3rem);
+        }
+
+        .room-content {
+            grid-template-columns: 1fr 3fr;
+        }
+
+        .storage-content {
+            grid-template-columns: 1fr 4fr;
+        }
+
+        .stats-box {
+            background: rgba(91, 33, 182, 0.3);
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            font-size: 0.9rem;
+            color: white;
+            text-align: right;
+        }
+
+        .stats-box p {
+            margin-bottom: 0.5rem;
+        }
+
+        .drop-zone {
+            border: 2px dashed;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            align-items: center;
+            align-content: center;
+            min-height: 200px;
+        }
+
+        .room-drop {
+            background: rgba(49, 46, 129, 0.5);
+            border-color: #fbbf24;
+        }
+
+        .room-drop.complete {
+            border-color: #4ade80;
+            animation: none !important;
+        }
+
+        .storage-drop {
+            background: rgba(30, 58, 138, 0.5);
+            border-color: #60a5fa;
+        }
+
+        .broom {
+            font-size: 3rem;
+            cursor: move;
+            transition: transform 0.2s;
+            position: relative;
+            user-select: none;
+        }
+
+        .broom:hover {
+            transform: scale(1.1);
+        }
+
+        .broom.added {
+            animation: bounce 2s infinite;
+        }
+
+        .broom .sparkle {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            font-size: 1rem;
+            animation: pulse 1s infinite;
+        }
+
+        .drag-label {
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #7c3aed;
+            color: white;
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            white-space: nowrap;
+        }
+
+        .storage-info {
+            text-align: center;
+            color: white;
+        }
+
+        .arrow-down {
+            font-size: 2.5rem;
+            animation: bounce 1s infinite;
+        }
+
+        .added-count {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid #4ade80;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .answer-popup {
+            position: fixed;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 1000px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 2px solid rgba(74, 222, 128, 0.5);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            display: none;
+        }
+
+        .answer-popup.show {
+            display: block;
+        }
+
+        .answer-content {
+            text-align: center;
+        }
+
+        .answer-title {
+            font-size: 1.5rem;
+            color: white;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .answer-question {
+            font-size: 1.25rem;
+            color: #fcd34d;
+            margin-bottom: 1rem;
+        }
+
+        .answer-input-group {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .answer-input {
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            width: 100px;
+            padding: 0.5rem;
+            border-radius: 0.75rem;
+            border: 2px solid #fbbf24;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .answer-label {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-check {
+            background: #22c55e;
+            color: white;
+        }
+
+        .btn-check:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+        }
+
+        .btn-reset {
+            background: #f97316;
+            color: white;
+        }
+
+        .feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: rgba(34, 197, 94, 0.8);
+            color: white;
+        }
+
+        .feedback.wrong {
+            background: rgba(239, 68, 68, 0.8);
+            color: white;
+        }
+
+        .explanation {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            text-align: right;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .pulse-border {
+            animation: pulse 1s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✨ חדר המטאטאים המעופפים ✨</h1>
+            <p>גרור מטאטאים לחדר ופתור את החידה!</p>
         </div>
 
-        <div className="grid grid-cols-12 gap-3 flex-1 min-h-0">
-          <div className="col-span-3 bg-white/10 backdrop-blur-lg rounded-2xl p-3 border-2 border-yellow-400/50 overflow-y-auto">
-            <div className="text-white text-right text-sm leading-relaxed">
-              <p className="mb-2 text-right font-bold">📜 המשימה שלך:</p>
-              <ol className="list-decimal list-inside space-y-1 bg-purple-800/50 p-2 rounded-xl text-right text-xs">
-                <li className="text-right">בחדר יש כרגע <span className="text-yellow-300 font-bold text-lg">3</span> מטאטאים קסומים</li>
-                <li className="text-right">צריך להיות בחדר בסך הכל <span className="text-green-300 font-bold text-lg">8</span> מטאטאים</li>
-                <li className="text-right"><strong>גרור מטאטאים נוספים</strong> מהמחסן לתוך החדר</li>
-                <li className="text-right">כשתסיים - ענה כמה מטאטאים הוספת!</li>
-              </ol>
+        <div class="main-grid">
+            <div class="instructions-box">
+                <h3>📜 המשימה שלך:</h3>
+                <ol>
+                    <li>בחדר יש כרגע <span class="number">3</span> מטאטאים קסומים</li>
+                    <li>צריך להיות בחדר בסך הכל <span class="number">8</span> מטאטאים</li>
+                    <li><strong>גרור מטאטאים נוספים</strong> מהמחסן לתוך החדר</li>
+                    <li>כשתסיים - ענה כמה מטאטאים הוספת!</li>
+                </ol>
             </div>
-          </div>
 
-        <div className="col-span-9 flex flex-col gap-3 min-h-0">
-          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-3 border-2 border-pink-400/50 flex-1 min-h-0 overflow-y-auto">
-            <h2 className="text-2xl font-bold text-white mb-2 text-center">
-              🏰 חדר המטאטאים
-            </h2>
-            
-            <div className="grid grid-cols-4 gap-3 h-full items-start">
-              <div className="bg-purple-800/30 rounded-xl p-2">
-                <p className="text-white text-sm text-right">
-                  יעד: <span className="text-green-300 font-bold text-xl">{targetTotal}</span> מטאטאים
-                </p>
-                <p className="text-white text-sm mt-1 text-right">
-                  עכשיו בחדר: <span className="text-yellow-300 font-bold text-xl">{totalInRoom}</span>
-                </p>
-                {needMore > 0 && (
-                  <p className="text-pink-300 font-bold text-sm mt-1 animate-pulse text-right">
-                    חסרים עוד {needMore} מטאטאים!
-                  </p>
-                )}
-                {needMore === 0 && (
-                  <p className="text-green-300 font-bold text-sm mt-1 text-center">
-                    ✨ מושלם! ✨
-                  </p>
-                )}
-              </div>
-
-              <div
-                onDragOver={handleDragOver}
-                onDrop={handleDropToRoom}
-                className={`col-span-3 bg-indigo-900/50 rounded-xl p-4 border-2 border-dashed ${
-                  needMore > 0 ? 'border-yellow-400 animate-pulse' : 'border-green-400'
-                } flex flex-wrap gap-4 justify-center items-center content-center`}
-              >
-                {roomBrooms.map(id => renderBroom(id, id <= 3 ? 'initial' : 'room'))}
-                
-                {roomBrooms.length === 0 && (
-                  <p className="text-white text-lg">גרור מטאטאים לכאן!</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-3 border-2 border-blue-400/50 flex-1 min-h-0 overflow-y-auto">
-            <h2 className="text-2xl font-bold text-white mb-2 text-center">
-              📦 מחסן המטאטאים
-            </h2>
-            
-            <div className="grid grid-cols-5 gap-3 h-full items-start">
-              <div className="text-center">
-                <ArrowDown className="w-8 h-8 text-yellow-400 mx-auto animate-bounce" />
-                <p className="text-white text-sm">גרור מכאן</p>
-                
-                {addedBrooms.length > 0 && (
-                  <div className="mt-2 p-2 bg-green-500/20 rounded-lg border border-green-400">
-                    <p className="text-white text-xs text-right">
-                      ✨ הוספת <span className="font-bold text-lg text-green-300">{addedBrooms.length}</span>
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              <div
-                onDragOver={handleDragOver}
-                onDrop={handleDropBack}
-                className="col-span-4 bg-blue-900/50 rounded-xl p-4 border-2 border-dashed border-blue-400 flex flex-wrap gap-4 justify-center items-center content-center"
-              >
-                {availableBrooms.map(id => renderBroom(id, 'available'))}
-                
-                {availableBrooms.length === 0 && (
-                  <p className="text-white text-sm text-center">
-                    כל המטאטאים בחדר!<br />גרור בחזרה אם רוצה לשנות
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-        </div>
-
-        {totalInRoom === targetTotal && (
-          <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 w-11/12 max-w-5xl bg-white/10 backdrop-blur-lg rounded-2xl p-4 border-2 border-green-400/50 shadow-2xl">
-            <div className="text-center">
-              <p className="text-2xl text-white mb-2 font-bold">🎉 מעולה! עכשיו ענה על השאלה:</p>
-              <p className="text-xl text-yellow-300 mb-2">כמה מטאטאים הוספת לחדר?</p>
-              
-              <div className="flex gap-3 justify-center items-center flex-wrap">
-                <input
-                  type="number"
-                  value={userAnswer}
-                  onChange={(e) => setUserAnswer(e.target.value)}
-                  placeholder="?"
-                  className="text-3xl font-bold text-center w-24 px-3 py-2 rounded-xl border-2 border-yellow-400 bg-white/90"
-                />
-                <span className="text-2xl text-white">מטאטאים</span>
-              </div>
-
-              <div className="mt-3 flex gap-3 justify-center">
-                <button
-                  onClick={handleSubmit}
-                  disabled={!userAnswer}
-                  className="px-6 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-500 text-white rounded-xl font-bold text-lg transition-all transform hover:scale-105 flex items-center gap-2"
-                >
-                  <CheckCircle className="w-5 h-5" />
-                  בדוק תשובה
-                </button>
-                <button
-                  onClick={reset}
-                  className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold text-lg transition-all transform hover:scale-105 flex items-center gap-2"
-                >
-                  <RotateCcw className="w-5 h-5" />
-                  התחל מחדש
-                </button>
-              </div>
-
-              {showFeedback && (
-                <div className={`mt-3 p-4 rounded-xl text-lg font-bold ${
-                  isCorrect 
-                    ? 'bg-green-500/80 text-white' 
-                    : 'bg-red-500/80 text-white'
-                }`}>
-                  {isCorrect ? (
-                    <div>
-                      <div className="flex items-center justify-center gap-2 mb-2">
-                        <span className="text-3xl">🎉</span>
-                        <span>כל הכבוד! התשובה נכונה!</span>
-                        <span className="text-3xl">⭐</span>
-                      </div>
-                      <div className="text-sm bg-white/20 p-3 rounded-lg text-right">
-                        <p className="text-right">היו 3 מטאטאים בהתחלה</p>
-                        <p className="text-right">הוספת {addedBrooms.length} מטאטאים</p>
-                        <p className="text-right">עכשיו יש 8 מטאטאים!</p>
-                        <p className="mt-1 text-yellow-300 text-center">8 - 3 = {addedBrooms.length} ✨</p>
-                      </div>
+            <div class="right-side">
+                <div class="room-box">
+                    <div class="section-title">🏰 חדר המטאטאים</div>
+                    <div class="room-content">
+                        <div class="stats-box">
+                            <p>יעד: <span class="number">8</span> מטאטאים</p>
+                            <p>עכשיו בחדר: <span class="number" id="current-count">3</span></p>
+                            <p id="need-more" class="pulse-border" style="color: #fbbf24;">חסרים עוד 5 מטאטאים!</p>
+                        </div>
+                        <div class="drop-zone room-drop pulse-border" id="room-zone">
+                            <div class="broom" draggable="false" data-id="1">🧹</div>
+                            <div class="broom" draggable="false" data-id="2">🧹</div>
+                            <div class="broom" draggable="false" data-id="3">🧹</div>
+                        </div>
                     </div>
-                  ) : (
-                    <div className="text-right">
-                      <p className="text-center">לא נכון, נסה שוב! 💪</p>
-                      <p className="text-sm mt-1 text-right">ספור כמה מטאטאים גררת מהמחסן לחדר</p>
-                    </div>
-                  )}
                 </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
 
-export default MagicBroomsApp;
+                <div class="storage-box">
+                    <div class="section-title">📦 מחסן המטאטאים</div>
+                    <div class="storage-content">
+                        <div class="storage-info">
+                            <div class="arrow-down">⬇️</div>
+                            <p style="font-size: 0.9rem;">גרור מכאן</p>
+                            <div class="added-count" id="added-info" style="display: none;">
+                                ✨ הוספת <span class="number" id="added-count">0</span> מטאטאים!
+                            </div>
+                        </div>
+                        <div class="drop-zone storage-drop" id="storage-zone">
+                            <div class="broom" draggable="true" data-id="4">
+                                🧹
+                                <span class="drag-label">גרור!</span>
+                            </div>
+                            <div class="broom" draggable="true" data-id="5">
+                                🧹
+                                <span class="drag-label">גרור!</span>
+                            </div>
+                            <div class="broom" draggable="true" data-id="6">
+                                🧹
+                                <span class="drag-label">גרור!</span>
+                            </div>
+                            <div class="broom" draggable="true" data-id="7">
+                                🧹
+                                <span class="drag-label">גרור!</span>
+                            </div>
+                            <div class="broom" draggable="true" data-id="8">
+                                🧹
+                                <span class="drag-label">גרור!</span>
+                            </div>
+                            <div class="broom" draggable="true" data-id="9">
+                                🧹
+                                <span class="drag-label">גרור!</span>
+                            </div>
+                            <div class="broom" draggable="true" data-id="10">
+                                🧹
+                                <span class="drag-label">גרור!</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="answer-popup" id="answer-popup">
+            <div class="answer-content">
+                <div class="answer-title">🎉 מעולה! עכשיו ענה על השאלה:</div>
+                <div class="answer-question">כמה מטאטאים הוספת לחדר?</div>
+                
+                <div class="answer-input-group">
+                    <input type="number" class="answer-input" id="answer-input" placeholder="?" min="0" max="10">
+                    <span class="answer-label">מטאטאים</span>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-check" id="check-btn">
+                        ✓ בדוק תשובה
+                    </button>
+                    <button class="btn btn-reset" id="reset-btn">
+                        ↻ התחל מחדש
+                    </button>
+                </div>
+
+                <div class="feedback" id="feedback"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let roomBrooms = [1, 2, 3];
+        let addedBrooms = [];
+        let draggedBroom = null;
+
+        const roomZone = document.getElementById('room-zone');
+        const storageZone = document.getElementById('storage-zone');
+        const answerPopup = document.getElementById('answer-popup');
+        const answerInput = document.getElementById('answer-input');
+        const checkBtn = document.getElementById('check-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const feedback = document.getElementById('feedback');
+        const currentCount = document.getElementById('current-count');
+        const needMore = document.getElementById('need-more');
+        const addedInfo = document.getElementById('added-info');
+        const addedCount = document.getElementById('added-count');
+
+        function updateStats() {
+            const total = roomBrooms.length;
+            currentCount.textContent = total;
+            
+            if (total < 8) {
+                needMore.textContent = `חסרים עוד ${8 - total} מטאטאים!`;
+                needMore.style.display = 'block';
+                roomZone.classList.add('pulse-border');
+                roomZone.classList.remove('complete');
+                answerPopup.classList.remove('show');
+            } else {
+                needMore.textContent = '✨ מושלם! ✨';
+                needMore.style.color = '#4ade80';
+                roomZone.classList.remove('pulse-border');
+                roomZone.classList.add('complete');
+                answerPopup.classList.add('show');
+            }
+
+            if (addedBrooms.length > 0) {
+                addedInfo.style.display = 'block';
+                addedCount.textContent = addedBrooms.length;
+            } else {
+                addedInfo.style.display = 'none';
+            }
+        }
+
+        document.addEventListener('dragstart', (e) => {
+            if (e.target.classList.contains('broom') && e.target.draggable) {
+                draggedBroom = parseInt(e.target.dataset.id);
+                e.target.style.opacity = '0.5';
+            }
+        });
+
+        document.addEventListener('dragend', (e) => {
+            if (e.target.classList.contains('broom')) {
+                e.target.style.opacity = '1';
+            }
+        });
+
+        roomZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+
+        roomZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (draggedBroom && !roomBrooms.includes(draggedBroom)) {
+                roomBrooms.push(draggedBroom);
+                addedBrooms.push(draggedBroom);
+                
+                const broomEl = document.querySelector(`[data-id="${draggedBroom}"]`);
+                broomEl.remove();
+                
+                const newBroom = document.createElement('div');
+                newBroom.className = 'broom added';
+                newBroom.draggable = true;
+                newBroom.dataset.id = draggedBroom;
+                newBroom.innerHTML = '🧹<span class="sparkle">✨</span>';
+                roomZone.appendChild(newBroom);
+                
+                updateStats();
+            }
+            draggedBroom = null;
+        });
+
+        storageZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+
+        storageZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (draggedBroom && addedBrooms.includes(draggedBroom)) {
+                roomBrooms = roomBrooms.filter(id => id !== draggedBroom);
+                addedBrooms = addedBrooms.filter(id => id !== draggedBroom);
+                
+                const broomEl = roomZone.querySelector(`[data-id="${draggedBroom}"]`);
+                broomEl.remove();
+                
+                const newBroom = document.createElement('div');
+                newBroom.className = 'broom';
+                newBroom.draggable = true;
+                newBroom.dataset.id = draggedBroom;
+                newBroom.innerHTML = '🧹<span class="drag-label">גרור!</span>';
+                storag
