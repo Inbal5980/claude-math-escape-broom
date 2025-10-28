@@ -1,321 +1,269 @@
-<!DOCTYPE html>
-<html lang="he" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>חדר הבריחה המתמטי</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+import React, { useState } from 'react';
+import { Sparkles, RotateCcw, CheckCircle, ArrowDown } from 'lucide-react';
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
+const MagicBroomsApp = () => {
+  const [roomBrooms, setRoomBrooms] = useState([1, 2, 3]);
+  const [addedBrooms, setAddedBrooms] = useState([]);
+  const [availableBrooms, setAvailableBrooms] = useState([4, 5, 6, 7, 8, 9, 10]);
+  const [userAnswer, setUserAnswer] = useState('');
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(false);
+  const [draggedBroom, setDraggedBroom] = useState(null);
 
-        .container {
-            width: 100%;
-            height: 100%;
-            max-width: 1400px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-        }
+  const targetTotal = 8;
 
-        .card {
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            padding: 32px;
-            width: 100%;
-            max-width: 900px;
-        }
+  const handleDragStart = (e, broomId) => {
+    setDraggedBroom(broomId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
 
-        .input-row {
-            display: flex;
-            justify-content: center;
-            gap: 24px;
-            margin-bottom: 24px;
-        }
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
 
-        .input-group {
-            text-align: center;
-        }
+  const handleDropToRoom = (e) => {
+    e.preventDefault();
+    if (draggedBroom && availableBrooms.includes(draggedBroom)) {
+      setAvailableBrooms(availableBrooms.filter(b => b !== draggedBroom));
+      setAddedBrooms([...addedBrooms, draggedBroom]);
+      setRoomBrooms([...roomBrooms, draggedBroom]);
+    }
+    setDraggedBroom(null);
+  };
 
-        .label {
-            color: #6b46c1;
-            font-weight: bold;
-            font-size: 18px;
-            margin-bottom: 8px;
-        }
+  const handleDropBack = (e) => {
+    e.preventDefault();
+    if (draggedBroom && addedBrooms.includes(draggedBroom)) {
+      setAddedBrooms(addedBrooms.filter(b => b !== draggedBroom));
+      setRoomBrooms(roomBrooms.filter(b => b !== draggedBroom));
+      setAvailableBrooms([...availableBrooms, draggedBroom].sort((a, b) => a - b));
+    }
+    setDraggedBroom(null);
+  };
 
-        .input-box {
-            width: 144px;
-            height: 80px;
-            font-size: 32px;
-            text-align: center;
-            border: 4px solid #fbbf24;
-            border-radius: 16px;
-            background: #fef3c7;
-            outline: none;
-            transition: border-color 0.3s;
-        }
+  const handleSubmit = () => {
+    const answer = parseInt(userAnswer);
+    const correct = answer === addedBrooms.length;
+    setIsCorrect(correct);
+    setShowFeedback(true);
+  };
 
-        .input-box:focus {
-            border-color: #f59e0b;
-        }
+  const reset = () => {
+    setRoomBrooms([1, 2, 3]);
+    setAddedBrooms([]);
+    setAvailableBrooms([4, 5, 6, 7, 8, 9, 10]);
+    setUserAnswer('');
+    setShowFeedback(false);
+    setIsCorrect(false);
+  };
 
-        .input-box:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
+  const renderBroom = (id, location) => {
+    const isAdded = addedBrooms.includes(id);
+    return (
+      <div
+        key={id}
+        draggable={location !== 'initial'}
+        onDragStart={(e) => handleDragStart(e, id)}
+        className={`relative cursor-move transform hover:scale-110 transition-all ${
+          isAdded ? 'animate-bounce' : ''
+        }`}
+        style={{
+          animationDelay: `${id * 0.1}s`,
+          animationDuration: '2s'
+        }}
+      >
+        <div className="text-5xl">🧹</div>
+        {isAdded && (
+          <div className="absolute -top-1 -right-1">
+            <Sparkles className="w-4 h-4 text-yellow-400 animate-pulse" />
+          </div>
+        )}
+        {location === 'available' && (
+          <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 bg-purple-600 text-white text-xs px-1 py-0.5 rounded-full">
+            גרור!
+          </div>
+        )}
+      </div>
+    );
+  };
 
-        .result-box {
-            width: 192px;
-            height: 96px;
-            border: 4px solid #a78bfa;
-            background: #ede9fe;
-        }
+  const totalInRoom = roomBrooms.length;
+  const needMore = targetTotal - totalInRoom;
 
-        .result-box:focus {
-            border-color: #8b5cf6;
-        }
-
-        .arrow {
-            text-align: center;
-            margin-bottom: 16px;
-        }
-
-        .arrow-icon {
-            font-size: 32px;
-            color: #8b5cf6;
-        }
-
-        .result-section {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-
-        .button {
-            width: 100%;
-            padding: 16px;
-            border-radius: 12px;
-            font-size: 20px;
-            font-weight: bold;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .button:hover {
-            transform: scale(1.05);
-        }
-
-        .check-button {
-            background: linear-gradient(to right, #8b5cf6, #4f46e5);
-            color: white;
-        }
-
-        .check-button:hover {
-            background: linear-gradient(to right, #7c3aed, #4338ca);
-        }
-
-        .retry-button {
-            background: linear-gradient(to right, #fb923c, #ec4899);
-            color: white;
-            margin-top: 12px;
-        }
-
-        .retry-button:hover {
-            background: linear-gradient(to right, #f97316, #db2777);
-        }
-
-        .message {
-            margin-top: 16px;
-            padding: 16px;
-            border-radius: 12px;
-            text-align: center;
-            font-size: 18px;
-            font-weight: 600;
-            direction: rtl;
-        }
-
-        .message.success {
-            background: #dcfce7;
-            color: #166534;
-            border: 4px solid #86efac;
-        }
-
-        .message.warning {
-            background: #fef3c7;
-            color: #92400e;
-            border: 4px solid #fde047;
-        }
-
-        .message.error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 4px solid #fca5a5;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .sparkle {
-            display: inline-block;
-            font-size: 20px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="card">
-            <!-- תיבות שינוי והתחלה -->
-            <div class="input-row">
-                <div class="input-group">
-                    <div class="label">שינוי</div>
-                    <input type="text" id="firstNum" class="input-box" maxlength="2">
-                </div>
-                <div class="input-group">
-                    <div class="label">התחלה</div>
-                    <input type="text" id="secondNum" class="input-box" maxlength="2">
-                </div>
-            </div>
-
-            <!-- חץ -->
-            <div class="arrow">
-                <div class="arrow-icon">↓</div>
-            </div>
-
-            <!-- תיבת סוף -->
-            <div class="result-section">
-                <div class="label">סוף</div>
-                <input type="text" id="result" class="input-box result-box" maxlength="2">
-            </div>
-
-            <!-- כפתור בדיקה -->
-            <button id="checkBtn" class="button check-button">
-                <span class="sparkle">✨</span>
-                <span>בדוק תשובה</span>
-                <span class="sparkle">✨</span>
-            </button>
-
-            <!-- הודעת משוב -->
-            <div id="message" class="message hidden"></div>
-
-            <!-- כפתור נסו שוב -->
-            <button id="retryBtn" class="button retry-button hidden">
-                🔄 נסו שוב
-            </button>
+  return (
+    <div className="h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 p-4 overflow-hidden" dir="rtl">
+      <div className="h-full max-w-7xl mx-auto flex flex-col">
+        <div className="text-center mb-3">
+          <h1 className="text-4xl font-bold text-yellow-300 mb-2 flex items-center justify-center gap-3">
+            <Sparkles className="w-8 h-8" />
+            חדר המטאטאים המעופפים
+            <Sparkles className="w-8 h-8" />
+          </h1>
+          <p className="text-lg text-purple-200">גרור מטאטאים לחדר ופתור את החידה!</p>
         </div>
+
+        <div className="grid grid-cols-12 gap-3 flex-1 min-h-0">
+          <div className="col-span-3 bg-white/10 backdrop-blur-lg rounded-2xl p-3 border-2 border-yellow-400/50 overflow-y-auto">
+            <div className="text-white text-right text-sm leading-relaxed">
+              <p className="mb-2 text-right font-bold">📜 המשימה שלך:</p>
+              <ol className="list-decimal list-inside space-y-1 bg-purple-800/50 p-2 rounded-xl text-right text-xs">
+                <li className="text-right">בחדר יש כרגע <span className="text-yellow-300 font-bold text-lg">3</span> מטאטאים קסומים</li>
+                <li className="text-right">צריך להיות בחדר בסך הכל <span className="text-green-300 font-bold text-lg">8</span> מטאטאים</li>
+                <li className="text-right"><strong>גרור מטאטאים נוספים</strong> מהמחסן לתוך החדר</li>
+                <li className="text-right">כשתסיים - ענה כמה מטאטאים הוספת!</li>
+              </ol>
+            </div>
+          </div>
+
+        <div className="col-span-9 flex flex-col gap-3 min-h-0">
+          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-3 border-2 border-pink-400/50 flex-1 min-h-0 overflow-y-auto">
+            <h2 className="text-2xl font-bold text-white mb-2 text-center">
+              🏰 חדר המטאטאים
+            </h2>
+            
+            <div className="grid grid-cols-4 gap-3 h-full items-start">
+              <div className="bg-purple-800/30 rounded-xl p-2">
+                <p className="text-white text-sm text-right">
+                  יעד: <span className="text-green-300 font-bold text-xl">{targetTotal}</span> מטאטאים
+                </p>
+                <p className="text-white text-sm mt-1 text-right">
+                  עכשיו בחדר: <span className="text-yellow-300 font-bold text-xl">{totalInRoom}</span>
+                </p>
+                {needMore > 0 && (
+                  <p className="text-pink-300 font-bold text-sm mt-1 animate-pulse text-right">
+                    חסרים עוד {needMore} מטאטאים!
+                  </p>
+                )}
+                {needMore === 0 && (
+                  <p className="text-green-300 font-bold text-sm mt-1 text-center">
+                    ✨ מושלם! ✨
+                  </p>
+                )}
+              </div>
+
+              <div
+                onDragOver={handleDragOver}
+                onDrop={handleDropToRoom}
+                className={`col-span-3 bg-indigo-900/50 rounded-xl p-4 border-2 border-dashed ${
+                  needMore > 0 ? 'border-yellow-400 animate-pulse' : 'border-green-400'
+                } flex flex-wrap gap-4 justify-center items-center content-center`}
+              >
+                {roomBrooms.map(id => renderBroom(id, id <= 3 ? 'initial' : 'room'))}
+                
+                {roomBrooms.length === 0 && (
+                  <p className="text-white text-lg">גרור מטאטאים לכאן!</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-3 border-2 border-blue-400/50 flex-1 min-h-0 overflow-y-auto">
+            <h2 className="text-2xl font-bold text-white mb-2 text-center">
+              📦 מחסן המטאטאים
+            </h2>
+            
+            <div className="grid grid-cols-5 gap-3 h-full items-start">
+              <div className="text-center">
+                <ArrowDown className="w-8 h-8 text-yellow-400 mx-auto animate-bounce" />
+                <p className="text-white text-sm">גרור מכאן</p>
+                
+                {addedBrooms.length > 0 && (
+                  <div className="mt-2 p-2 bg-green-500/20 rounded-lg border border-green-400">
+                    <p className="text-white text-xs text-right">
+                      ✨ הוספת <span className="font-bold text-lg text-green-300">{addedBrooms.length}</span>
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div
+                onDragOver={handleDragOver}
+                onDrop={handleDropBack}
+                className="col-span-4 bg-blue-900/50 rounded-xl p-4 border-2 border-dashed border-blue-400 flex flex-wrap gap-4 justify-center items-center content-center"
+              >
+                {availableBrooms.map(id => renderBroom(id, 'available'))}
+                
+                {availableBrooms.length === 0 && (
+                  <p className="text-white text-sm text-center">
+                    כל המטאטאים בחדר!<br />גרור בחזרה אם רוצה לשנות
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+        </div>
+
+        {totalInRoom === targetTotal && (
+          <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 w-11/12 max-w-5xl bg-white/10 backdrop-blur-lg rounded-2xl p-4 border-2 border-green-400/50 shadow-2xl">
+            <div className="text-center">
+              <p className="text-2xl text-white mb-2 font-bold">🎉 מעולה! עכשיו ענה על השאלה:</p>
+              <p className="text-xl text-yellow-300 mb-2">כמה מטאטאים הוספת לחדר?</p>
+              
+              <div className="flex gap-3 justify-center items-center flex-wrap">
+                <input
+                  type="number"
+                  value={userAnswer}
+                  onChange={(e) => setUserAnswer(e.target.value)}
+                  placeholder="?"
+                  className="text-3xl font-bold text-center w-24 px-3 py-2 rounded-xl border-2 border-yellow-400 bg-white/90"
+                />
+                <span className="text-2xl text-white">מטאטאים</span>
+              </div>
+
+              <div className="mt-3 flex gap-3 justify-center">
+                <button
+                  onClick={handleSubmit}
+                  disabled={!userAnswer}
+                  className="px-6 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-500 text-white rounded-xl font-bold text-lg transition-all transform hover:scale-105 flex items-center gap-2"
+                >
+                  <CheckCircle className="w-5 h-5" />
+                  בדוק תשובה
+                </button>
+                <button
+                  onClick={reset}
+                  className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold text-lg transition-all transform hover:scale-105 flex items-center gap-2"
+                >
+                  <RotateCcw className="w-5 h-5" />
+                  התחל מחדש
+                </button>
+              </div>
+
+              {showFeedback && (
+                <div className={`mt-3 p-4 rounded-xl text-lg font-bold ${
+                  isCorrect 
+                    ? 'bg-green-500/80 text-white' 
+                    : 'bg-red-500/80 text-white'
+                }`}>
+                  {isCorrect ? (
+                    <div>
+                      <div className="flex items-center justify-center gap-2 mb-2">
+                        <span className="text-3xl">🎉</span>
+                        <span>כל הכבוד! התשובה נכונה!</span>
+                        <span className="text-3xl">⭐</span>
+                      </div>
+                      <div className="text-sm bg-white/20 p-3 rounded-lg text-right">
+                        <p className="text-right">היו 3 מטאטאים בהתחלה</p>
+                        <p className="text-right">הוספת {addedBrooms.length} מטאטאים</p>
+                        <p className="text-right">עכשיו יש 8 מטאטאים!</p>
+                        <p className="mt-1 text-yellow-300 text-center">8 - 3 = {addedBrooms.length} ✨</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-right">
+                      <p className="text-center">לא נכון, נסה שוב! 💪</p>
+                      <p className="text-sm mt-1 text-right">ספור כמה מטאטאים גררת מהמחסן לחדר</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
+  );
+};
 
-    <script>
-        const firstNumInput = document.getElementById('firstNum');
-        const secondNumInput = document.getElementById('secondNum');
-        const resultInput = document.getElementById('result');
-        const checkBtn = document.getElementById('checkBtn');
-        const retryBtn = document.getElementById('retryBtn');
-        const messageDiv = document.getElementById('message');
-
-        let isCorrect = false;
-
-        function checkAnswer() {
-            const firstNum = firstNumInput.value.trim();
-            const secondNum = secondNumInput.value.trim();
-            const result = resultInput.value.trim();
-
-            // בדיקה אם כל השדות מלאים
-            if (!firstNum || !secondNum || !result) {
-                showMessage('❌ אופס! עליך למלא את כל השדות', 'error');
-                return;
-            }
-
-            const num1 = parseInt(firstNum);
-            const num2 = parseInt(secondNum);
-            const res = parseInt(result);
-
-            // בדיקה שהערכים הם מספרים תקינים
-            if (isNaN(num1) || isNaN(num2) || isNaN(res)) {
-                showMessage('❌ אופסס.. זה לא נכון. נסו שוב', 'error');
-                return;
-            }
-
-            // בדיקה אם זה התרגיל הנכון: 3+5=8 או 5+3=8
-            if ((num1 === 3 && num2 === 5 && res === 8) || (num1 === 5 && num2 === 3 && res === 8)) {
-                showMessage('🎉 כל הכבוד! כעת לחצו על חץ ההמשך וכתבו את הפתרון במקום המתאים כדי לעבור לחדר הבא!', 'success');
-                isCorrect = true;
-                disableInputs();
-                checkBtn.classList.add('hidden');
-                retryBtn.classList.add('hidden');
-                return;
-            }
-
-            // בדיקה אם זה תרגיל חיבור נכון מתמטית
-            if (num1 + num2 === res) {
-                showMessage('🤔 התרגיל המתמטי שכתבתם נכון אבל הוא אינו מתאים לפתרון השאלה בחדר. נסו שוב!', 'warning');
-                retryBtn.classList.remove('hidden');
-                return;
-            }
-
-            showMessage('❌ אופסס.. זה לא נכון. נסו שוב', 'error');
-            retryBtn.classList.remove('hidden');
-        }
-
-        function showMessage(text, type) {
-            messageDiv.textContent = text;
-            messageDiv.className = 'message ' + type;
-            messageDiv.classList.remove('hidden');
-        }
-
-        function resetInputs() {
-            firstNumInput.value = '';
-            secondNumInput.value = '';
-            resultInput.value = '';
-            messageDiv.classList.add('hidden');
-            retryBtn.classList.add('hidden');
-            isCorrect = false;
-            enableInputs();
-        }
-
-        function disableInputs() {
-            firstNumInput.disabled = true;
-            secondNumInput.disabled = true;
-            resultInput.disabled = true;
-        }
-
-        function enableInputs() {
-            firstNumInput.disabled = false;
-            secondNumInput.disabled = false;
-            resultInput.disabled = false;
-        }
-
-        checkBtn.addEventListener('click', checkAnswer);
-        retryBtn.addEventListener('click', resetInputs);
-
-        // אפשרות ללחוץ Enter לבדיקה
-        [firstNumInput, secondNumInput, resultInput].forEach(input => {
-            input.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && !isCorrect) {
-                    checkAnswer();
-                }
-            });
-        });
-    </script>
-</body>
-</html>
+export default MagicBroomsApp;
