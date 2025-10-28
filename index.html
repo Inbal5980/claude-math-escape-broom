@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>חדר המטאטאים המעופפים</title>
+    <title>חדר הבריחה המתמטי</title>
     <style>
         * {
             margin: 0;
@@ -13,646 +13,309 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #4c1d95 0%, #312e81 50%, #1e3a8a 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 100vw;
             height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             overflow: hidden;
-            direction: rtl;
         }
 
         .container {
+            width: 100%;
+            height: 100%;
             max-width: 1400px;
-            height: 100vh;
-            margin: 0 auto;
-            padding: 1rem;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 1rem;
-        }
-
-        .header h1 {
-            color: #fcd34d;
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .header p {
-            color: #c4b5fd;
-            font-size: 1.1rem;
-        }
-
-        .main-grid {
-            display: grid;
-            grid-template-columns: 25% 75%;
-            gap: 0.75rem;
-            flex: 1;
-            min-height: 0;
-        }
-
-        .instructions-box {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 1rem;
-            padding: 1rem;
-            border: 2px solid rgba(250, 204, 21, 0.5);
-            overflow-y: auto;
-        }
-
-        .instructions-box h3 {
-            color: white;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-        }
-
-        .instructions-box ol {
-            background: rgba(91, 33, 182, 0.5);
-            padding: 0.75rem;
-            border-radius: 0.75rem;
-            list-style-position: inside;
-            font-size: 0.85rem;
-            color: white;
-        }
-
-        .instructions-box li {
-            margin-bottom: 0.5rem;
-        }
-
-        .instructions-box .number {
-            color: #fcd34d;
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
-
-        .right-side {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            min-height: 0;
-        }
-
-        .room-box, .storage-box {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 1rem;
-            padding: 0.75rem;
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .room-box {
-            border: 2px solid rgba(244, 114, 182, 0.5);
-        }
-
-        .storage-box {
-            border: 2px solid rgba(96, 165, 250, 0.5);
-        }
-
-        .section-title {
-            text-align: center;
-            color: white;
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 0.75rem;
-        }
-
-        .room-content, .storage-content {
-            display: grid;
-            gap: 0.75rem;
-            height: calc(100% - 3rem);
-        }
-
-        .room-content {
-            grid-template-columns: 1fr 3fr;
-        }
-
-        .storage-content {
-            grid-template-columns: 1fr 4fr;
-        }
-
-        .stats-box {
-            background: rgba(91, 33, 182, 0.3);
-            border-radius: 0.75rem;
-            padding: 0.75rem;
-            font-size: 0.9rem;
-            color: white;
-            text-align: right;
-        }
-
-        .stats-box p {
-            margin-bottom: 0.5rem;
-        }
-
-        .drop-zone {
-            border: 2px dashed;
-            border-radius: 0.75rem;
-            padding: 1.5rem;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            justify-content: center;
-            align-items: center;
-            align-content: center;
-            min-height: 200px;
-        }
-
-        .room-drop {
-            background: rgba(49, 46, 129, 0.5);
-            border-color: #fbbf24;
-        }
-
-        .room-drop.complete {
-            border-color: #4ade80;
-            animation: none !important;
-        }
-
-        .storage-drop {
-            background: rgba(30, 58, 138, 0.5);
-            border-color: #60a5fa;
-        }
-
-        .broom {
-            font-size: 3rem;
-            cursor: move;
-            transition: transform 0.2s;
-            position: relative;
-            user-select: none;
-        }
-
-        .broom:hover {
-            transform: scale(1.1);
-        }
-
-        .broom.added {
-            animation: bounce 2s infinite;
-        }
-
-        .broom .sparkle {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            font-size: 1rem;
-            animation: pulse 1s infinite;
-        }
-
-        .drag-label {
-            position: absolute;
-            bottom: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #7c3aed;
-            color: white;
-            font-size: 0.65rem;
-            padding: 2px 6px;
-            border-radius: 10px;
-            white-space: nowrap;
-        }
-
-        .storage-info {
-            text-align: center;
-            color: white;
-        }
-
-        .arrow-down {
-            font-size: 2.5rem;
-            animation: bounce 1s infinite;
-        }
-
-        .added-count {
-            margin-top: 0.5rem;
-            padding: 0.5rem;
-            background: rgba(34, 197, 94, 0.2);
-            border: 1px solid #4ade80;
-            border-radius: 0.5rem;
-            font-size: 0.75rem;
-        }
-
-        .answer-popup {
-            position: fixed;
-            bottom: 1rem;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 1000px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 1rem;
-            padding: 1.5rem;
-            border: 2px solid rgba(74, 222, 128, 0.5);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-            display: none;
-        }
-
-        .answer-popup.show {
-            display: block;
-        }
-
-        .answer-content {
-            text-align: center;
-        }
-
-        .answer-title {
-            font-size: 1.5rem;
-            color: white;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-
-        .answer-question {
-            font-size: 1.25rem;
-            color: #fcd34d;
-            margin-bottom: 1rem;
-        }
-
-        .answer-input-group {
-            display: flex;
-            gap: 0.75rem;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .answer-input {
-            font-size: 2rem;
-            font-weight: bold;
-            text-align: center;
-            width: 100px;
-            padding: 0.5rem;
-            border-radius: 0.75rem;
-            border: 2px solid #fbbf24;
-            background: rgba(255, 255, 255, 0.9);
-        }
-
-        .answer-label {
-            font-size: 1.5rem;
-            color: white;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 0.75rem;
-            justify-content: center;
-        }
-
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 0.75rem;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            justify-content: center;
+            padding: 24px;
         }
 
-        .btn:hover {
-            transform: scale(1.05);
+        .card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            padding: 32px;
+            width: 100%;
+            max-width: 900px;
         }
 
-        .btn-check {
-            background: #22c55e;
-            color: white;
+        .input-row {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 24px;
         }
 
-        .btn-check:disabled {
-            background: #6b7280;
+        .input-group {
+            text-align: center;
+        }
+
+        .label {
+            color: #6b46c1;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .input-box {
+            width: 144px;
+            height: 80px;
+            font-size: 32px;
+            text-align: center;
+            border: 4px solid #fbbf24;
+            border-radius: 16px;
+            background: #fef3c7;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .input-box:focus {
+            border-color: #f59e0b;
+        }
+
+        .input-box:disabled {
+            opacity: 0.6;
             cursor: not-allowed;
         }
 
-        .btn-reset {
-            background: #f97316;
+        .result-box {
+            width: 192px;
+            height: 96px;
+            border: 4px solid #a78bfa;
+            background: #ede9fe;
+        }
+
+        .result-box:focus {
+            border-color: #8b5cf6;
+        }
+
+        .arrow {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .arrow-icon {
+            font-size: 32px;
+            color: #8b5cf6;
+        }
+
+        .result-section {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .button {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .button:hover {
+            transform: scale(1.05);
+        }
+
+        .check-button {
+            background: linear-gradient(to right, #8b5cf6, #4f46e5);
             color: white;
         }
 
-        .feedback {
-            margin-top: 1rem;
-            padding: 1rem;
-            border-radius: 0.75rem;
-            font-size: 1.1rem;
-            font-weight: bold;
+        .check-button:hover {
+            background: linear-gradient(to right, #7c3aed, #4338ca);
+        }
+
+        .retry-button {
+            background: linear-gradient(to right, #fb923c, #ec4899);
+            color: white;
+            margin-top: 12px;
+        }
+
+        .retry-button:hover {
+            background: linear-gradient(to right, #f97316, #db2777);
+        }
+
+        .message {
+            margin-top: 16px;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            direction: rtl;
+        }
+
+        .message.success {
+            background: #dcfce7;
+            color: #166534;
+            border: 4px solid #86efac;
+        }
+
+        .message.warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 4px solid #fde047;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 4px solid #fca5a5;
+        }
+
+        .hidden {
             display: none;
         }
 
-        .feedback.show {
-            display: block;
-        }
-
-        .feedback.correct {
-            background: rgba(34, 197, 94, 0.8);
-            color: white;
-        }
-
-        .feedback.wrong {
-            background: rgba(239, 68, 68, 0.8);
-            color: white;
-        }
-
-        .explanation {
-            margin-top: 0.75rem;
-            padding: 0.75rem;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 0.5rem;
-            font-size: 0.9rem;
-            text-align: right;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .pulse-border {
-            animation: pulse 1s infinite;
+        .sparkle {
+            display: inline-block;
+            font-size: 20px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>✨ חדר המטאטאים המעופפים ✨</h1>
-            <p>גרור מטאטאים לחדר ופתור את החידה!</p>
-        </div>
-
-        <div class="main-grid">
-            <div class="instructions-box">
-                <h3>📜 המשימה שלך:</h3>
-                <ol>
-                    <li>בחדר יש כרגע <span class="number">3</span> מטאטאים קסומים</li>
-                    <li>צריכים להיות בחדר בסך הכל <span class="number">8</span> מטאטאים</li>
-                    <li><strong>גררו מטאטאים נוספים</strong> מהמחסן לתוך החדר</li>
-                    <li>כשתסיימו - ענו כמה מטאטאים הוספתם!</li>
-                </ol>
-            </div>
-
-            <div class="right-side">
-                <div class="room-box">
-                    <div class="section-title">🏰 חדר המטאטאים</div>
-                    <div class="room-content">
-                        <div class="stats-box">
-                            <p>יעד: <span class="number">8</span> מטאטאים</p>
-                            <p>עכשיו בחדר: <span class="number" id="current-count">3</span></p>
-                            <p id="need-more" class="pulse-border" style="color: #fbbf24;">חסרים עוד 5 מטאטאים!</p>
-                        </div>
-                        <div class="drop-zone room-drop pulse-border" id="room-zone">
-                            <div class="broom" draggable="false" data-id="1">🧹</div>
-                            <div class="broom" draggable="false" data-id="2">🧹</div>
-                            <div class="broom" draggable="false" data-id="3">🧹</div>
-                        </div>
-                    </div>
+        <div class="card">
+            <!-- תיבות התחלה ושינוי -->
+            <div class="input-row">
+                <div class="input-group">
+                    <div class="label">התחלה</div>
+                    <input type="text" id="firstNum" class="input-box" maxlength="2">
                 </div>
-
-                <div class="storage-box">
-                    <div class="section-title">📦 מחסן המטאטאים</div>
-                    <div class="storage-content">
-                        <div class="storage-info">
-                            <div class="arrow-down">⬇️</div>
-                            <p style="font-size: 0.9rem;">גרור מכאן</p>
-                            <div class="added-count" id="added-info" style="display: none;">
-                                ✨ הוספת <span class="number" id="added-count">0</span> מטאטאים!
-                            </div>
-                        </div>
-                        <div class="drop-zone storage-drop" id="storage-zone">
-                            <div class="broom" draggable="true" data-id="4">
-                                🧹
-                                <span class="drag-label">גרור!</span>
-                            </div>
-                            <div class="broom" draggable="true" data-id="5">
-                                🧹
-                                <span class="drag-label">גרור!</span>
-                            </div>
-                            <div class="broom" draggable="true" data-id="6">
-                                🧹
-                                <span class="drag-label">גרור!</span>
-                            </div>
-                            <div class="broom" draggable="true" data-id="7">
-                                🧹
-                                <span class="drag-label">גרור!</span>
-                            </div>
-                            <div class="broom" draggable="true" data-id="8">
-                                🧹
-                                <span class="drag-label">גרור!</span>
-                            </div>
-                            <div class="broom" draggable="true" data-id="9">
-                                🧹
-                                <span class="drag-label">גרור!</span>
-                            </div>
-                            <div class="broom" draggable="true" data-id="10">
-                                🧹
-                                <span class="drag-label">גרור!</span>
-                            </div>
-                        </div>
-                    </div>
+                <div class="input-group">
+                    <div class="label">שינוי</div>
+                    <input type="text" id="secondNum" class="input-box" maxlength="2">
                 </div>
             </div>
-        </div>
 
-        <div class="answer-popup" id="answer-popup">
-            <div class="answer-content">
-                <div class="answer-title">🎉 מעולה! עכשיו ענה על השאלה:</div>
-                <div class="answer-question">כמה מטאטאים הוספת לחדר?</div>
-                
-                <div class="answer-input-group">
-                    <input type="number" class="answer-input" id="answer-input" placeholder="?" min="0" max="10">
-                    <span class="answer-label">מטאטאים</span>
-                </div>
-
-                <div class="button-group">
-                    <button class="btn btn-check" id="check-btn">
-                        ✓ בדוק תשובה
-                    </button>
-                    <button class="btn btn-reset" id="reset-btn">
-                        ↻ התחל מחדש
-                    </button>
-                </div>
-
-                <div class="feedback" id="feedback"></div>
+            <!-- חץ -->
+            <div class="arrow">
+                <div class="arrow-icon">↓</div>
             </div>
+
+            <!-- תיבת סוף -->
+            <div class="result-section">
+                <div class="label">סוף</div>
+                <input type="text" id="result" class="input-box result-box" maxlength="2">
+            </div>
+
+            <!-- כפתור בדיקה -->
+            <button id="checkBtn" class="button check-button">
+                <span class="sparkle">✨</span>
+                <span>בדוק תשובה</span>
+                <span class="sparkle">✨</span>
+            </button>
+
+            <!-- הודעת משוב -->
+            <div id="message" class="message hidden"></div>
+
+            <!-- כפתור נסו שוב -->
+            <button id="retryBtn" class="button retry-button hidden">
+                🔄 נסו שוב
+            </button>
         </div>
     </div>
 
     <script>
-        let roomBrooms = [1, 2, 3];
-        let addedBrooms = [];
-        let draggedBroom = null;
+        const firstNumInput = document.getElementById('firstNum');
+        const secondNumInput = document.getElementById('secondNum');
+        const resultInput = document.getElementById('result');
+        const checkBtn = document.getElementById('checkBtn');
+        const retryBtn = document.getElementById('retryBtn');
+        const messageDiv = document.getElementById('message');
 
-        const roomZone = document.getElementById('room-zone');
-        const storageZone = document.getElementById('storage-zone');
-        const answerPopup = document.getElementById('answer-popup');
-        const answerInput = document.getElementById('answer-input');
-        const checkBtn = document.getElementById('check-btn');
-        const resetBtn = document.getElementById('reset-btn');
-        const feedback = document.getElementById('feedback');
-        const currentCount = document.getElementById('current-count');
-        const needMore = document.getElementById('need-more');
-        const addedInfo = document.getElementById('added-info');
-        const addedCount = document.getElementById('added-count');
+        let isCorrect = false;
 
-        function updateStats() {
-            const total = roomBrooms.length;
-            currentCount.textContent = total;
-            
-            if (total < 8) {
-                needMore.textContent = `חסרים עוד ${8 - total} מטאטאים!`;
-                needMore.style.display = 'block';
-                roomZone.classList.add('pulse-border');
-                roomZone.classList.remove('complete');
-                answerPopup.classList.remove('show');
-            } else {
-                needMore.textContent = '✨ מושלם! ✨';
-                needMore.style.color = '#4ade80';
-                roomZone.classList.remove('pulse-border');
-                roomZone.classList.add('complete');
-                answerPopup.classList.add('show');
+        function checkAnswer() {
+            const firstNum = firstNumInput.value.trim();
+            const secondNum = secondNumInput.value.trim();
+            const result = resultInput.value.trim();
+
+            // בדיקה אם כל השדות מלאים
+            if (!firstNum || !secondNum || !result) {
+                showMessage('❌ אופס! עליך למלא את כל השדות', 'error');
+                return;
             }
 
-            if (addedBrooms.length > 0) {
-                addedInfo.style.display = 'block';
-                addedCount.textContent = addedBrooms.length;
-            } else {
-                addedInfo.style.display = 'none';
+            const num1 = parseInt(firstNum);
+            const num2 = parseInt(secondNum);
+            const res = parseInt(result);
+
+            // בדיקה שהערכים הם מספרים תקינים
+            if (isNaN(num1) || isNaN(num2) || isNaN(res)) {
+                showMessage('❌ אופסס.. זה לא נכון. נסו שוב', 'error');
+                return;
             }
+
+            // בדיקה אם זה התרגיל הנכון: 3+5=8 או 5+3=8
+            if ((num1 === 3 && num2 === 5 && res === 8) || (num1 === 5 && num2 === 3 && res === 8)) {
+                showMessage('🎉 כל הכבוד! כעת לחצו על חץ ההמשך וכתבו את הפתרון במקום המתאים כדי לעבור לחדר הבא!', 'success');
+                isCorrect = true;
+                disableInputs();
+                checkBtn.classList.add('hidden');
+                retryBtn.classList.add('hidden');
+                return;
+            }
+
+            // בדיקה אם זה תרגיל חיבור נכון מתמטית
+            if (num1 + num2 === res) {
+                showMessage('🤔 התרגיל המתמטי שכתבתם נכון אבל הוא אינו מתאים לפתרון השאלה בחדר. נסו שוב!', 'warning');
+                retryBtn.classList.remove('hidden');
+                return;
+            }
+
+            showMessage('❌ אופסס.. זה לא נכון. נסו שוב', 'error');
+            retryBtn.classList.remove('hidden');
         }
 
-        function setupDragEvents() {
-            document.querySelectorAll('.broom').forEach(broom => {
-                broom.addEventListener('dragstart', (e) => {
-                    if (broom.draggable) {
-                        draggedBroom = parseInt(broom.dataset.id);
-                        broom.style.opacity = '0.5';
-                        e.dataTransfer.effectAllowed = 'move';
-                    }
-                });
+        function showMessage(text, type) {
+            messageDiv.textContent = text;
+            messageDiv.className = 'message ' + type;
+            messageDiv.classList.remove('hidden');
+        }
 
-                broom.addEventListener('dragend', (e) => {
-                    broom.style.opacity = '1';
-                });
+        function resetInputs() {
+            firstNumInput.value = '';
+            secondNumInput.value = '';
+            resultInput.value = '';
+            messageDiv.classList.add('hidden');
+            retryBtn.classList.add('hidden');
+            isCorrect = false;
+            enableInputs();
+        }
+
+        function disableInputs() {
+            firstNumInput.disabled = true;
+            secondNumInput.disabled = true;
+            resultInput.disabled = true;
+        }
+
+        function enableInputs() {
+            firstNumInput.disabled = false;
+            secondNumInput.disabled = false;
+            resultInput.disabled = false;
+        }
+
+        checkBtn.addEventListener('click', checkAnswer);
+        retryBtn.addEventListener('click', resetInputs);
+
+        // אפשרות ללחוץ Enter לבדיקה
+        [firstNumInput, secondNumInput, resultInput].forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !isCorrect) {
+                    checkAnswer();
+                }
             });
-        }
-
-        roomZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
         });
-
-        roomZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            if (draggedBroom && !roomBrooms.includes(draggedBroom)) {
-                roomBrooms.push(draggedBroom);
-                addedBrooms.push(draggedBroom);
-                
-                const broomEl = document.querySelector(`[data-id="${draggedBroom}"]`);
-                if (broomEl) {
-                    broomEl.remove();
-                }
-                
-                const newBroom = document.createElement('div');
-                newBroom.className = 'broom added';
-                newBroom.draggable = true;
-                newBroom.dataset.id = draggedBroom;
-                newBroom.innerHTML = '🧹<span class="sparkle">✨</span>';
-                roomZone.appendChild(newBroom);
-                
-                setupDragEvents();
-                updateStats();
-            }
-            draggedBroom = null;
-        });
-
-        storageZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-        });
-
-        storageZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            if (draggedBroom && addedBrooms.includes(draggedBroom)) {
-                roomBrooms = roomBrooms.filter(id => id !== draggedBroom);
-                addedBrooms = addedBrooms.filter(id => id !== draggedBroom);
-                
-                const broomEl = roomZone.querySelector(`[data-id="${draggedBroom}"]`);
-                if (broomEl) {
-                    broomEl.remove();
-                }
-                
-                const newBroom = document.createElement('div');
-                newBroom.className = 'broom';
-                newBroom.draggable = true;
-                newBroom.dataset.id = draggedBroom;
-                newBroom.innerHTML = '🧹<span class="drag-label">גרור!</span>';
-                storageZone.appendChild(newBroom);
-                
-                setupDragEvents();
-                updateStats();
-            }
-            draggedBroom = null;
-        });
-
-        checkBtn.addEventListener('click', () => {
-            const answer = parseInt(answerInput.value);
-            feedback.classList.add('show');
-            
-            if (answer === addedBrooms.length) {
-                feedback.className = 'feedback show correct';
-                feedback.innerHTML = `
-                    <div style="text-align: center; margin-bottom: 0.75rem;">
-                        <span style="font-size: 2rem;">🎉</span>
-                        כל הכבוד! התשובה נכונה!
-                        <span style="font-size: 2rem;">⭐</span>
-                    </div>
-                    <div class="explanation">
-                        <p>היו 3 מטאטאים בהתחלה</p>
-                        <p>הוספת ${addedBrooms.length} מטאטאים</p>
-                        <p>עכשיו יש 8 מטאטאים!</p>
-                        <p style="text-align: center; margin-top: 0.5rem; color: #fcd34d;">8 - 3 = ${addedBrooms.length} ✨</p>
-                    </div>
-                `;
-            } else {
-                feedback.className = 'feedback show wrong';
-                feedback.innerHTML = `
-                    <p style="text-align: center;">לא נכון, נסה שוב! 💪</p>
-                    <p style="font-size: 0.9rem; margin-top: 0.5rem; text-align: right;">ספור כמה מטאטאים גררת מהמחסן לחדר</p>
-                `;
-            }
-        });
-
-        resetBtn.addEventListener('click', () => {
-            roomBrooms = [1, 2, 3];
-            addedBrooms = [];
-            answerInput.value = '';
-            feedback.classList.remove('show');
-            
-            roomZone.innerHTML = `
-                <div class="broom" draggable="false" data-id="1">🧹</div>
-                <div class="broom" draggable="false" data-id="2">🧹</div>
-                <div class="broom" draggable="false" data-id="3">🧹</div>
-            `;
-            
-            storageZone.innerHTML = `
-                <div class="broom" draggable="true" data-id="4">🧹<span class="drag-label">גרור!</span></div>
-                <div class="broom" draggable="true" data-id="5">🧹<span class="drag-label">גרור!</span></div>
-                <div class="broom" draggable="true" data-id="6">🧹<span class="drag-label">גרור!</span></div>
-                <div class="broom" draggable="true" data-id="7">🧹<span class="drag-label">גרור!</span></div>
-                <div class="broom" draggable="true" data-id="8">🧹<span class="drag-label">גרור!</span></div>
-                <div class="broom" draggable="true" data-id="9">🧹<span class="drag-label">גרור!</span></div>
-                <div class="broom" draggable="true" data-id="10">🧹<span class="drag-label">גרור!</span></div>
-            `;
-            
-            setupDragEvents();
-            updateStats();
-        });
-
-        // Initialize drag events on page load
-        setupDragEvents();
-        updateStats();
     </script>
 </body>
 </html>
