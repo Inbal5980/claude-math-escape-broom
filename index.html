@@ -185,15 +185,17 @@
 <body>
     <div class="container">
         <div class="card">
-            <!-- תיבות התחלה ושינוי -->
-            <div class="input-row">
+            <!-- תיבות שינוי והתחלה -->
+            <div class="input-row" style="direction: ltr;">
                 <div class="input-group">
-                    <div class="label">התחלה</div>
-                    <input type="text" id="firstNum" class="input-box" maxlength="2">
+                    <div class="label" style="direction: rtl;">שינוי</div>
+                    <div class="input-box" style="display: flex; align-items: center; justify-content: center; cursor: default; font-size: 22px; color: #6b46c1;">
+                        לא ידוע
+                    </div>
                 </div>
                 <div class="input-group">
-                    <div class="label">שינוי</div>
-                    <input type="text" id="secondNum" class="input-box" maxlength="2">
+                    <div class="label" style="direction: rtl;">התחלה</div>
+                    <input type="text" id="startNum" class="input-box" maxlength="2">
                 </div>
             </div>
 
@@ -226,8 +228,7 @@
     </div>
 
     <script>
-        const firstNumInput = document.getElementById('firstNum');
-        const secondNumInput = document.getElementById('secondNum');
+        const startNumInput = document.getElementById('startNum');
         const resultInput = document.getElementById('result');
         const checkBtn = document.getElementById('checkBtn');
         const retryBtn = document.getElementById('retryBtn');
@@ -236,40 +237,34 @@
         let isCorrect = false;
 
         function checkAnswer() {
-            const firstNum = firstNumInput.value.trim();
-            const secondNum = secondNumInput.value.trim();
+            const startNum = startNumInput.value.trim();
             const result = resultInput.value.trim();
 
             // בדיקה אם כל השדות מלאים
-            if (!firstNum || !secondNum || !result) {
+            if (!startNum || !result) {
                 showMessage('❌ אופס! עליך למלא את כל השדות', 'error');
                 return;
             }
 
-            const num1 = parseInt(firstNum);
-            const num2 = parseInt(secondNum);
+            const num1 = parseInt(startNum);
             const res = parseInt(result);
 
+            // הצגת הערכים לבדיקה
+            console.log('התחלה:', num1, 'סוף:', res);
+
             // בדיקה שהערכים הם מספרים תקינים
-            if (isNaN(num1) || isNaN(num2) || isNaN(res)) {
-                showMessage('❌ אופסס.. זה לא נכון. נסו שוב', 'error');
+            if (isNaN(num1) || isNaN(res)) {
+                showMessage('אופס זה עדיין לא נכון', 'error');
                 return;
             }
 
-            // בדיקה אם זה התרגיל הנכון: 3+5=8 או 5+3=8
-            if ((num1 === 3 && num2 === 5 && res === 8) || (num1 === 5 && num2 === 3 && res === 8)) {
+            // בדיקה אם זה התרגיל הנכון: התחלה=3 וסוף=8
+            if (num1 === 3 && res === 8) {
                 showMessage('🎉 כל הכבוד! לחצו על החץ האפור משמאל כדי לעבור לשלב הבא', 'success');
                 isCorrect = true;
                 disableInputs();
                 checkBtn.classList.add('hidden');
                 retryBtn.classList.add('hidden');
-                return;
-            }
-
-            // בדיקה אם זה תרגיל חיבור נכון מתמטית
-            if (num1 + num2 === res) {
-                showMessage('אופס זה עדיין לא נכון', 'warning');
-                retryBtn.classList.remove('hidden');
                 return;
             }
 
@@ -284,8 +279,7 @@
         }
 
         function resetInputs() {
-            firstNumInput.value = '';
-            secondNumInput.value = '';
+            startNumInput.value = '';
             resultInput.value = '';
             messageDiv.classList.add('hidden');
             retryBtn.classList.add('hidden');
@@ -294,14 +288,12 @@
         }
 
         function disableInputs() {
-            firstNumInput.disabled = true;
-            secondNumInput.disabled = true;
+            startNumInput.disabled = true;
             resultInput.disabled = true;
         }
 
         function enableInputs() {
-            firstNumInput.disabled = false;
-            secondNumInput.disabled = false;
+            startNumInput.disabled = false;
             resultInput.disabled = false;
         }
 
@@ -309,7 +301,7 @@
         retryBtn.addEventListener('click', resetInputs);
 
         // אפשרות ללחוץ Enter לבדיקה
-        [firstNumInput, secondNumInput, resultInput].forEach(input => {
+        [startNumInput, resultInput].forEach(input => {
             input.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter' && !isCorrect) {
                     checkAnswer();
